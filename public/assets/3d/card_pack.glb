@@ -1,0 +1,4 @@
+// This is a placeholder for the actual 3D model file.
+// You should replace this with a real .glb file containing a 3D card pack model.
+// The model should have a main mesh named "CardPack" and a material named "CardPackMaterial".
+
