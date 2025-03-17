@@ -4,10 +4,10 @@ import { createContext, useContext, useState, useEffect, type ReactNode } from "
 import { toast } from "@/components/ui/use-toast"
 import { Connection, PublicKey, clusterApiUrl, LAMPORTS_PER_SOL } from "@solana/web3.js"
 
-// 定义钱包类型
+// Define wallet type
 export type WalletType = "phantom" | "solflare" | null
 
-// 定义钱包上下文类型
+// Define wallet context type
 interface WalletContextType {
   wallet: WalletType
   address: string | null
@@ -19,14 +19,14 @@ interface WalletContextType {
   refreshBalance: () => Promise<void>
 }
 
-// 创建上下文
+// Create context
 const WalletContext = createContext<WalletContextType | undefined>(undefined)
 
-// 创建Solana连接 - 使用devnet而不是mainnet-beta来避免访问限制
-// 也可以使用自定义RPC端点，如果有的话
+// Create Solana connection - using devnet instead of mainnet-beta to avoid access limits
+// Can also use custom RPC endpoint if available
 const connection = new Connection(clusterApiUrl("devnet"), "confirmed")
 
-// 钱包提供者组件
+// Wallet provider component
 export function WalletProvider({ children }: { children: ReactNode }) {
   const [wallet, setWallet] = useState<WalletType>(null)
   const [address, setAddress] = useState<string | null>(null)
@@ -34,23 +34,23 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const [isConnecting, setIsConnecting] = useState(false)
   const [isConnected, setIsConnected] = useState(false)
 
-  // 检查是否有保存的钱包连接
+  // Check if there's a saved wallet connection
   useEffect(() => {
     const savedWallet = localStorage.getItem("connectedWallet")
     const savedAddress = localStorage.getItem("walletAddress")
 
     if (savedWallet && savedAddress) {
-      // 设置保存的状态
+      // Set saved state
       setWallet(savedWallet as WalletType)
       setAddress(savedAddress)
       setIsConnected(true)
 
-      // 获取余额
+      // Get balance
       fetchBalance(savedAddress).catch(console.error)
 
-      // 尝试重新连接
+      // Try to reconnect
       connect(savedWallet as WalletType).catch(() => {
-        // 如果重连失败，清除保存的状态
+        // If reconnection fails, clear saved state
         localStorage.removeItem("connectedWallet")
         localStorage.removeItem("walletAddress")
         setWallet(null)
@@ -60,7 +60,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  // 获取钱包余额
+  // Get wallet balance
   const fetchBalance = async (walletAddress: string) => {
     try {
       const publicKey = new PublicKey(walletAddress)
@@ -69,38 +69,38 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       setBalance(solBalance)
       return solBalance
     } catch (error) {
-      console.error("获取余额失败:", error)
+      console.error("Failed to get balance:", error)
 
-      // 即使获取余额失败，也不影响连接状态
-      // 返回当前余额或默认值
+      // Even if getting balance fails, don't affect connection status
+      // Return current balance or default value
       return balance || 0
     }
   }
 
-  // 刷新余额
+  // Refresh balance
   const refreshBalance = async () => {
     if (address) {
       try {
         await fetchBalance(address)
         return true
       } catch (error) {
-        console.error("刷新余额失败:", error)
-        // 如果是devnet，可以尝试请求空投
+        console.error("Failed to refresh balance:", error)
+        // If on devnet, try requesting airdrop
         if (connection.rpcEndpoint.includes("devnet")) {
           try {
             const publicKey = new PublicKey(address)
-            // 尝试请求空投1个SOL
+            // Try requesting 1 SOL airdrop
             await connection.requestAirdrop(publicKey, LAMPORTS_PER_SOL)
-            // 等待确认
+            // Wait for confirmation
             await new Promise((resolve) => setTimeout(resolve, 2000))
-            // 重新获取余额
+            // Get balance again
             await fetchBalance(address)
             toast({
-              title: "已请求空投",
-              description: "在开发网络上请求了1个SOL的空投",
+              title: "Airdrop Requested",
+              description: "Requested 1 SOL airdrop on devnet",
             })
           } catch (airdropError) {
-            console.error("空投请求失败:", airdropError)
+            console.error("Airdrop request failed:", airdropError)
           }
         }
         return false
@@ -109,31 +109,31 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     return false
   }
 
-  // 连接钱包
+  // Connect wallet
   const connect = async (type: WalletType) => {
     if (!type) return
 
     setIsConnecting(true)
 
     try {
-      // 检查钱包是否已安装
+      // Check if wallet is installed
       if (type === "phantom") {
         if (!window.phantom?.solana) {
           window.open("https://phantom.app/", "_blank")
-          throw new Error("请安装Phantom钱包")
+          throw new Error("Please install Phantom wallet")
         }
 
-        // 连接Phantom钱包
+        // Connect Phantom wallet
         const provider = window.phantom?.solana
         const response = await provider.connect()
         const publicKey = response.publicKey.toString()
 
-        // 获取余额 - 即使失败也继续
+        // Get balance - continue even if it fails
         let solBalance = 0
         try {
           solBalance = await fetchBalance(publicKey)
         } catch (error) {
-          console.error("获取余额失败，使用默认值:", error)
+          console.error("Failed to get balance, using default:", error)
         }
 
         setWallet(type)
@@ -141,31 +141,31 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         setBalance(solBalance)
         setIsConnected(true)
 
-        // 保存连接状态
+        // Save connection state
         localStorage.setItem("connectedWallet", type)
         localStorage.setItem("walletAddress", publicKey)
 
         toast({
-          title: "钱包已连接",
-          description: `已成功连接到 ${publicKey.slice(0, 6)}...${publicKey.slice(-4)}`,
+          title: "Wallet Connected",
+          description: `Successfully connected to ${publicKey.slice(0, 6)}...${publicKey.slice(-4)}`,
         })
       } else if (type === "solflare") {
         if (!window.solflare) {
           window.open("https://solflare.com/", "_blank")
-          throw new Error("请安装Solflare钱包")
+          throw new Error("Please install Solflare wallet")
         }
 
-        // 连接Solflare钱包
+        // Connect Solflare wallet
         const provider = window.solflare
         await provider.connect()
         const publicKey = provider.publicKey.toString()
 
-        // 获取余额 - 即使失败也继续
+        // Get balance - continue even if it fails
         let solBalance = 0
         try {
           solBalance = await fetchBalance(publicKey)
         } catch (error) {
-          console.error("获取余额失败，使用默认值:", error)
+          console.error("Failed to get balance, using default:", error)
         }
 
         setWallet(type)
@@ -173,20 +173,20 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         setBalance(solBalance)
         setIsConnected(true)
 
-        // 保存连接状态
+        // Save connection state
         localStorage.setItem("connectedWallet", type)
         localStorage.setItem("walletAddress", publicKey)
 
         toast({
-          title: "钱包已连接",
-          description: `已成功连接到 ${publicKey.slice(0, 6)}...${publicKey.slice(-4)}`,
+          title: "Wallet Connected",
+          description: `Successfully connected to ${publicKey.slice(0, 6)}...${publicKey.slice(-4)}`,
         })
       }
     } catch (error: any) {
-      console.error("连接钱包失败:", error)
+      console.error("Failed to connect wallet:", error)
       toast({
-        title: "连接失败",
-        description: error.message || "连接钱包时出现错误",
+        title: "Connection Failed",
+        description: error.message || "Failed to connect wallet",
         variant: "destructive",
       })
     } finally {
@@ -194,7 +194,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  // 断开钱包连接
+  // Disconnect wallet
   const disconnect = () => {
     if (wallet === "phantom" && window.phantom?.solana) {
       window.phantom.solana.disconnect()
@@ -207,17 +207,17 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     setBalance(0)
     setIsConnected(false)
 
-    // 清除保存的状态
+    // Clear saved state
     localStorage.removeItem("connectedWallet")
     localStorage.removeItem("walletAddress")
 
     toast({
-      title: "已断开连接",
-      description: "钱包已成功断开连接",
+      title: "Disconnected",
+      description: "Wallet disconnected successfully",
     })
   }
 
-  // 监听钱包账户变化
+  // Listen for wallet account changes
   useEffect(() => {
     const handleAccountChange = async () => {
       if (wallet === "phantom" && window.phantom?.solana) {
@@ -231,7 +231,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
             await fetchBalance(publicKey)
           }
         } catch (error) {
-          console.error("账户变更处理失败:", error)
+          console.error("Failed to handle account change:", error)
         }
       } else if (wallet === "solflare" && window.solflare) {
         try {
@@ -243,17 +243,17 @@ export function WalletProvider({ children }: { children: ReactNode }) {
             await fetchBalance(publicKey)
           }
         } catch (error) {
-          console.error("账户变更处理失败:", error)
+          console.error("Failed to handle account change:", error)
         }
       }
     }
 
-    // 设置定期刷新余额的计时器 - 减少频率以避免请求限制
+    // Set interval to refresh balance periodically - reduce frequency to avoid request limits
     const balanceInterval = setInterval(() => {
       if (address) {
         fetchBalance(address).catch(console.error)
       }
-    }, 60000) // 每60秒刷新一次
+    }, 60000) // Refresh every 60 seconds
 
     return () => {
       clearInterval(balanceInterval)
@@ -278,7 +278,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   )
 }
 
-// 使用钱包上下文的Hook
+// Use wallet context hook
 export function useWallet() {
   const context = useContext(WalletContext)
   if (context === undefined) {
@@ -287,7 +287,7 @@ export function useWallet() {
   return context
 }
 
-// 为TypeScript添加全局类型定义
+// Add global type definitions for TypeScript
 declare global {
   interface Window {
     phantom?: {
@@ -303,4 +303,3 @@ declare global {
     }
   }
 }
-

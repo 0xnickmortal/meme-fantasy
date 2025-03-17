@@ -22,10 +22,10 @@ export function PackOpening({ packType = "doge", onComplete }: PackOpeningProps)
       setRotation((prev) => (prev + 10) % 360)
     }, 50)
 
-    // 模拟开包过程
+    // Simulate pack opening process
     const timer = setTimeout(() => {
       setIsOpening(false)
-      // 直接显示卡牌展示弹窗
+      // Show card reveal dialog directly
       setShowRevealDialog(true)
     }, 3000)
 
@@ -35,7 +35,7 @@ export function PackOpening({ packType = "doge", onComplete }: PackOpeningProps)
     }
   }, [])
 
-  // 根据包类型选择不同的颜色
+  // Choose different colors based on pack type
   const getPackColor = () => {
     switch (packType) {
       case "doge":
@@ -80,8 +80,7 @@ export function PackOpening({ packType = "doge", onComplete }: PackOpeningProps)
     </div>
   )
 }
-// 检查是否有任何地方调用了 usePackOpportunity
+// Check if usePackOpportunity is called anywhere
 
-// 这个组件不应该直接调用 usePackOpportunity，而应该由父组件 GameDashboard 来管理
-// 确认这个组件中没有调用 usePackOpportunity 的代码
-
+// This component should not call usePackOpportunity directly, it should be managed by parent GameDashboard
+// Confirm there's no usePackOpportunity code in this component

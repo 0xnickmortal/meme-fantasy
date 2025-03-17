@@ -15,12 +15,12 @@ interface PackOpportunityContextType {
 const PackOpportunityContext = createContext<PackOpportunityContextType | undefined>(undefined)
 
 export function PackOpportunityProvider({ children }: { children: ReactNode }) {
-  const [packOpportunities, setPackOpportunities] = useState(5) // 新用户默认5次机会
-  const [timeUntilNextPack, setTimeUntilNextPack] = useState(7200) // 2小时 = 7200秒
+  const [packOpportunities, setPackOpportunities] = useState(5) // 5 opportunities for new users
+  const [timeUntilNextPack, setTimeUntilNextPack] = useState(7200) // 2 hours = 7200 seconds
   const [isTimerActive, setIsTimerActive] = useState(false)
   const [isPackOpening, setIsPackOpening] = useState(false)
 
-  // 从localStorage加载状态
+  // Load state from localStorage
   useEffect(() => {
     const savedState = localStorage.getItem("packOpportunityState")
     const lastUpdated = localStorage.getItem("packOpportunityLastUpdated")
@@ -31,35 +31,35 @@ export function PackOpportunityProvider({ children }: { children: ReactNode }) {
       const currentTime = Date.now()
       const elapsedSeconds = Math.floor((currentTime - lastUpdatedTime) / 1000)
 
-      // 计算在离线期间应该增加的开包机会
+      // Calculate pack opportunities that should be added during offline period
       const additionalOpportunities = Math.floor(elapsedSeconds / 7200)
       let newOpportunities = Math.min(parsedState.packOpportunities + additionalOpportunities, 5)
 
-      // 计算新的倒计时
+      // Calculate new countdown
       let newTimeUntilNextPack = parsedState.timeUntilNextPack - (elapsedSeconds % 7200)
       if (newTimeUntilNextPack <= 0 && newOpportunities < 5) {
         newOpportunities += 1
         newTimeUntilNextPack = 7200
       }
 
-      // 如果已经有5次机会，暂停计时器
+      // If already have 5 opportunities, pause the timer
       const isActive = newOpportunities < 5
 
       setPackOpportunities(newOpportunities)
       setTimeUntilNextPack(newTimeUntilNextPack > 0 ? newTimeUntilNextPack : 7200)
       setIsTimerActive(isActive)
     } else {
-      // 新用户，设置默认状态
+      // New user, set default state
       setPackOpportunities(5)
       setTimeUntilNextPack(7200)
       setIsTimerActive(false)
 
-      // 保存到localStorage
+      // Save to localStorage
       saveState(5, 7200, false)
     }
   }, [])
 
-  // 计时器
+  // Timer
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null
 
@@ -69,17 +69,17 @@ export function PackOpportunityProvider({ children }: { children: ReactNode }) {
           const newTime = prev - 1
 
           if (newTime <= 0) {
-            // 时间到，增加一次开包机会
+            // Time's up, increase pack opening opportunity
             const newOpportunities = Math.min(packOpportunities + 1, 5)
             setPackOpportunities(newOpportunities)
 
-            // 如果达到5次机会，暂停计时器
+            // If reached 5 opportunities, pause timer
             if (newOpportunities >= 5) {
               setIsTimerActive(false)
             }
 
             saveState(newOpportunities, 7200, newOpportunities < 5)
-            return 7200 // 重置为2小时
+            return 7200 // Reset to 2 hours
           }
 
           saveState(packOpportunities, newTime, isTimerActive)
@@ -93,13 +93,13 @@ export function PackOpportunityProvider({ children }: { children: ReactNode }) {
     }
   }, [isTimerActive, packOpportunities])
 
-  // 使用开包机会
+  // Use pack opening opportunity
   const usePackOpportunity = () => {
     if (packOpportunities > 0) {
       const newOpportunities = packOpportunities - 1
       setPackOpportunities(newOpportunities)
 
-      // 如果之前有5次机会（计时器暂停），现在使用了一次，需要启动计时器
+      // If previously had 5 opportunities (timer paused), now used one, need to start timer
       if (packOpportunities === 5) {
         setIsTimerActive(true)
       }
@@ -110,7 +110,7 @@ export function PackOpportunityProvider({ children }: { children: ReactNode }) {
     return false
   }
 
-  // 保存状态到localStorage
+  // Save state to localStorage
   const saveState = (opportunities: number, time: number, active: boolean) => {
     localStorage.setItem(
       "packOpportunityState",
@@ -123,7 +123,7 @@ export function PackOpportunityProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("packOpportunityLastUpdated", Date.now().toString())
   }
 
-  // 格式化时间为 HH:MM:SS
+  // Format time as HH:MM:SS
   const formatTime = (seconds: number): string => {
     const hours = Math.floor(seconds / 3600)
     const minutes = Math.floor((seconds % 3600) / 60)
@@ -156,4 +156,3 @@ export function usePackOpportunity() {
   }
   return context
 }
-

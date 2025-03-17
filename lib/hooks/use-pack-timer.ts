@@ -4,19 +4,19 @@ import { useState, useEffect } from "react"
 
 interface PackTimerState {
   packOpportunities: number
-  timeUntilNextPack: number // 以秒为单位
+  timeUntilNextPack: number // in seconds
   isTimerActive: boolean
 }
 
 export function usePackTimer() {
   const [state, setState] = useState<PackTimerState>({
-    packOpportunities: 5, // 新用户默认5次机会
-    timeUntilNextPack: 7200, // 2小时 = 7200秒
+    packOpportunities: 5, // 5 opportunities for new users
+    timeUntilNextPack: 7200, // 2 hours = 7200 seconds
     isTimerActive: false,
   })
 
   useEffect(() => {
-    // 从localStorage加载状态
+    // Load state from localStorage
     const savedState = localStorage.getItem("packTimerState")
     const lastUpdated = localStorage.getItem("packTimerLastUpdated")
 
@@ -26,18 +26,18 @@ export function usePackTimer() {
       const currentTime = Date.now()
       const elapsedSeconds = Math.floor((currentTime - lastUpdatedTime) / 1000)
 
-      // 计算在离线期间应该增加的开包机会
+      // Calculate pack opportunities that should be added during offline period
       const additionalOpportunities = Math.floor(elapsedSeconds / 7200)
       let newOpportunities = Math.min(parsedState.packOpportunities + additionalOpportunities, 5)
 
-      // 计算新的倒计时
+      // Calculate new countdown
       let newTimeUntilNextPack = parsedState.timeUntilNextPack - (elapsedSeconds % 7200)
       if (newTimeUntilNextPack <= 0 && newOpportunities < 5) {
         newOpportunities += 1
         newTimeUntilNextPack = 7200
       }
 
-      // 如果已经有5次机会，暂停计时器
+      // If already have 5 opportunities, pause the timer
       const isActive = newOpportunities < 5
 
       setState({
@@ -46,14 +46,14 @@ export function usePackTimer() {
         isTimerActive: isActive,
       })
     } else {
-      // 新用户，设置默认状态
+      // New user, set default state
       setState({
         packOpportunities: 5,
         timeUntilNextPack: 7200,
         isTimerActive: false,
       })
 
-      // 保存到localStorage
+      // Save to localStorage
       saveState({
         packOpportunities: 5,
         timeUntilNextPack: 7200,
@@ -71,13 +71,13 @@ export function usePackTimer() {
           const newTimeUntilNextPack = prevState.timeUntilNextPack - 1
 
           if (newTimeUntilNextPack <= 0) {
-            // 时间到，增加一次开包机会
+            // Time's up, increase pack opening opportunity
             const newOpportunities = Math.min(prevState.packOpportunities + 1, 5)
             const isActive = newOpportunities < 5
 
             const newState = {
               packOpportunities: newOpportunities,
-              timeUntilNextPack: 7200, // 重置为2小时
+              timeUntilNextPack: 7200, // Reset to 2 hours
               isTimerActive: isActive,
             }
 
@@ -101,7 +101,7 @@ export function usePackTimer() {
     }
   }, [state.isTimerActive])
 
-  // 使用开包机会
+  // Use pack opening opportunity
   const usePackOpportunity = () => {
     if (state.packOpportunities > 0) {
       const newOpportunities = state.packOpportunities - 1
@@ -110,7 +110,7 @@ export function usePackTimer() {
       const newState = {
         packOpportunities: newOpportunities,
         timeUntilNextPack: state.timeUntilNextPack,
-        isTimerActive: true, // 使用了一次机会后，激活计时器
+        isTimerActive: true, // Activate timer after using one opportunity
       }
 
       setState(newState)
@@ -120,13 +120,13 @@ export function usePackTimer() {
     return false
   }
 
-  // 保存状态到localStorage
+  // Save state to localStorage
   const saveState = (state: PackTimerState) => {
     localStorage.setItem("packTimerState", JSON.stringify(state))
     localStorage.setItem("packTimerLastUpdated", Date.now().toString())
   }
 
-  // 格式化时间为 HH:MM:SS
+  // Format time as HH:MM:SS
   const formatTime = (seconds: number): string => {
     const hours = Math.floor(seconds / 3600)
     const minutes = Math.floor((seconds % 3600) / 60)
@@ -143,4 +143,3 @@ export function usePackTimer() {
     usePackOpportunity,
   }
 }
-

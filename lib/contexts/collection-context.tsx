@@ -14,7 +14,7 @@ const CollectionContext = createContext<CollectionContextType | undefined>(undef
 export function CollectionProvider({ children }: { children: ReactNode }) {
   const [cards, setCards] = useState<CardData[]>([])
 
-  // 从localStorage加载卡牌收藏
+  // Load card collection from localStorage
   useEffect(() => {
     if (typeof window !== "undefined") {
       const savedCards = localStorage.getItem("cardCollection")
@@ -28,21 +28,21 @@ export function CollectionProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  // 保存卡牌收藏到localStorage
+  // Save card collection to localStorage
   useEffect(() => {
     if (typeof window !== "undefined") {
       localStorage.setItem("cardCollection", JSON.stringify(cards))
     }
   }, [cards])
 
-  // 添加新卡牌到收藏
+  // Add new cards to collection
   const addCards = (newCards: CardData[]) => {
     if (newCards && newCards.length > 0) {
       setCards((prevCards) => [...prevCards, ...newCards])
     }
   }
 
-  // 从收藏中移除卡牌
+  // Remove cards from collection
   const removeCards = (cardIds: number[]) => {
     if (cardIds && cardIds.length > 0) {
       setCards((prevCards) => prevCards.filter((card) => !cardIds.includes(card.id)))
@@ -59,4 +59,3 @@ export function useCollection() {
   }
   return context
 }
-

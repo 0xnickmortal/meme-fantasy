@@ -42,7 +42,7 @@ export function WalletConnectButton() {
   // View in block explorer
   const viewOnExplorer = () => {
     if (address) {
-      // 使用devnet浏览器
+      // Use devnet explorer
       window.open(`https://explorer.solana.com/address/${address}?cluster=devnet`, "_blank")
     }
   }
@@ -78,7 +78,7 @@ export function WalletConnectButton() {
       const connection = new Connection(clusterApiUrl("devnet"), "confirmed")
       const publicKey = new PublicKey(address)
 
-      // 请求1个SOL的空投
+      // Request 1 SOL airdrop
       const signature = await connection.requestAirdrop(publicKey, LAMPORTS_PER_SOL)
 
       toast({
@@ -231,4 +231,3 @@ export function WalletConnectButton() {
     </>
   )
 }
-

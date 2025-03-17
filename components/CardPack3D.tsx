@@ -10,25 +10,25 @@ interface CardPackProps {
   position: [number, number, number]
   onClick: () => void
   isDisabled: boolean
-  packType: "doge" | "popcat" | "pepe" // 添加这一行
+  packType: "doge" | "popcat" | "pepe" // Add this line
 }
 
-// 更新函数签名，添加packType参数
+// Update function signature, add packType parameter
 export function CardPack3D({ position, onClick, isDisabled, packType }: CardPackProps) {
   const groupRef = useRef<THREE.Group>(null)
   const [hovered, setHovered] = useState(false)
 
-  // 根据packType选择不同的GLB文件
+  // Choose different GLB file based on packType
   const modelUrl = {
     doge: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/package_doge-rkxeJRrNZM7ngHuCKAzxEw284Fybj2.glb",
     popcat: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/package_popcat-u0sMdyz0AgiOJXY59v6B2sRlWnVdmW.glb",
     pepe: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/package_pepe-yw5yfbRpE4jznLXgSzFipRwP6QiMiF.glb",
   }[packType]
 
-  // 加载对应的GLB文件
+  // Load corresponding GLB file
   const { scene } = useGLTF(modelUrl)
 
-  // 克隆场景以避免修改缓存的原始场景
+  // Clone scene to avoid modifying cached original scene
   const model = scene.clone()
 
   useFrame((state) => {
@@ -37,7 +37,7 @@ export function CardPack3D({ position, onClick, isDisabled, packType }: CardPack
     }
   })
 
-  // 如果禁用，应用灰色材质
+  // If disabled, apply gray material
   if (isDisabled) {
     model.traverse((child) => {
       if (child instanceof THREE.Mesh) {
@@ -85,7 +85,7 @@ export function CardPack3D({ position, onClick, isDisabled, packType }: CardPack
   )
 }
 
-// 预加载所有模型以提高性能
+// Preload all models to improve performance
 useGLTF.preload(
   "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/package_doge-rkxeJRrNZM7ngHuCKAzxEw284Fybj2.glb",
 )
@@ -95,4 +95,3 @@ useGLTF.preload(
 useGLTF.preload(
   "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/package_pepe-yw5yfbRpE4jznLXgSzFipRwP6QiMiF.glb",
 )
-

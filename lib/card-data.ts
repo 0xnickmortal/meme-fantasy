@@ -10,7 +10,7 @@ export interface CardData {
   isNFT: boolean
 }
 
-// 卡片图片资源
+// Card image resources
 export const cardImages = [
   "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/1-olr9d2aE2Q4B1q7bGUOO6Q9Sa45wJV.png",
   "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/2-kOCVmyOO9SXGYayxMy3W2kHbjXUiVR.png",
@@ -18,7 +18,7 @@ export const cardImages = [
   "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/4-cwDwOaf6X9BujnFhGzYr2GAytsznki.png",
 ]
 
-// 卡片名称库
+// Card name library
 export const cardNames = [
   "DOGE",
   "PEPE",
@@ -52,7 +52,7 @@ export const cardNames = [
   "ROCKET",
 ]
 
-// 不同包类型的稀有度分布
+// Rarity distribution for different pack types
 export const rarityDistribution = {
   doge: {
     [CardRarity.Common]: 50,
@@ -80,7 +80,7 @@ export const rarityDistribution = {
   },
 }
 
-// 根据稀有度生成卡牌属性
+// Generate card attributes based on rarity
 export function generateCardStats(rarity: CardRarity): { power: number; socialScore: number } {
   let basePower = 0
   let baseSocialScore = 0
@@ -118,7 +118,7 @@ export function generateCardStats(rarity: CardRarity): { power: number; socialSc
   }
 }
 
-// 根据包类型随机生成稀有度
+// Generate random rarity based on pack type
 export function generateRarity(packType = "doge"): CardRarity {
   const distribution = rarityDistribution[packType as keyof typeof rarityDistribution] || rarityDistribution.doge
   const rand = Math.random() * 100
@@ -131,17 +131,17 @@ export function generateRarity(packType = "doge"): CardRarity {
     }
   }
 
-  return CardRarity.Common // 默认返回普通卡
+  return CardRarity.Common // Default to common card
 }
 
-// 生成一张随机卡牌
+// Generate a random card
 export function generateRandomCard(packType = "doge"): CardData {
   const rarity = generateRarity(packType)
   const { power, socialScore } = generateCardStats(rarity)
   const randomId = Date.now() + Math.floor(Math.random() * 1000)
   const randomName = cardNames[Math.floor(Math.random() * cardNames.length)]
   const randomImage = cardImages[Math.floor(Math.random() * cardImages.length)]
-  const isNFT = Math.random() < 0.2 // 20%的概率是NFT
+  const isNFT = Math.random() < 0.2 // 20% chance to be NFT
 
   return {
     id: randomId,
@@ -154,14 +154,14 @@ export function generateRandomCard(packType = "doge"): CardData {
   }
 }
 
-// 生成一组随机卡牌
+// Generate a set of random cards
 export function generateCardPack(packType = "doge", count = 5): CardData[] {
   const cards: CardData[] = []
   for (let i = 0; i < count; i++) {
     cards.push(generateRandomCard(packType))
   }
 
-  // 按稀有度排序
+  // Sort by rarity
   return cards.sort((a, b) => {
     const rarityOrder = {
       [CardRarity.Common]: 0,
@@ -175,4 +175,3 @@ export function generateCardPack(packType = "doge", count = 5): CardData[] {
     return rarityOrder[b.rarity] - rarityOrder[a.rarity]
   })
 }
-

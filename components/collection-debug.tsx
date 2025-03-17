@@ -9,11 +9,11 @@ export function CollectionDebug() {
   const [count, setCount] = useState(0)
 
   const handleClearCollection = () => {
-    // 清空收藏 - 使用更安全的方式
+    // Clear collection - using a safer approach
     const cardIds = cards.map((card) => card.id)
     if (cardIds.length > 0) {
       removeCards(cardIds)
-      setCount((prev) => prev + 1) // 触发重新渲染
+      setCount((prev) => prev + 1) // Trigger re-render
     }
   }
 
@@ -37,4 +37,3 @@ export function CollectionDebug() {
     </div>
   )
 }
-
